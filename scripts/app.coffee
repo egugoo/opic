@@ -58,11 +58,16 @@ d3.tsv 'data.tsv', row, (err, rows) ->
                   sel.select('audio').node().currentTime = 0
                 else
                   sel.select('audio').node().pause()
+
           sel.append 'audio'
-            .on 'play', (d) -> sel.select('.control').text 'stop'
+            .on 'play', (d) ->
+              sel.select('.control').text 'stop'
+              d3.selectAll('.card').classed 'card-outline-primary', false
+              d3.select(sel.node().parentNode.parentNode)
+                .classed 'card-outline-primary', true
             .on 'pause', (d) ->
-                sel.select('.control').text 'play_arrow'
-                t0 = Date.now()
+              sel.select('.control').text 'play_arrow'
+              t0 = Date.now()  # reset timer
             .append 'source'
               .attr 'src', (d) -> "questions/#{d.id.toLowerCase()}.mp3"
               .attr 'type', 'audio/mpeg'
