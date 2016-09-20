@@ -1,3 +1,12 @@
+t0 = Date.now()
+format = d3.timeFormat('%M:%S')
+
+setInterval ->
+  t1 = Date.now() - t0
+  d3.select('#timer').attr 'value', t1
+  d3.select('#time').text format t1
+, 100
+
 row = (d) ->
   id: d.Id
   day: d.Day
@@ -17,40 +26,52 @@ d3.tsv 'data.tsv', row, (err, rows) ->
             .append 'div'
               .classed 'card-block', true
 
-  card.append 'h4'
-      .classed 'card-title', true
-      .style 'color', (d) -> color d.day
-      .text (d) -> d.id
+  card.append 'div'
+      .attr 'class', 'pull-xs-left'
+      .call (sel) ->
+        sel.append 'span'
+          .attr 'class', 'btn btn-link btn-nodeco material-icons'
+          .style 'color', (d) -> color d.day
+          .text 'lens'
+        sel.append 'span'
+          .attr 'class', 'card-title'
+          .text (d) -> "#{d.id} #{d.day}"
 
-  # audio and button
   card.each ->
       sel = d3.select @
-      sel.append 'button'
-        .attr 'class', 'btn btn-link material-icons control'
-        .text 'play_arrow'
-        .on 'click', ->
-          switch sel.select('.control').text()
-            when 'play_arrow'
-              sel.select('audio').node().play()
-            when 'stop'
-              sel.select('audio').node().pause()
-              sel.select('audio').node().currentTime = 0
-            else
-              sel.select('audio').node().pause()
-      sel.append 'audio'
-        .on 'play', (d) -> sel.select('.control').text 'stop'
-        .on 'pause', (d) -> sel.select('.control').text 'play_arrow'
-        .append 'source'
-          .attr 'src', (d) -> "questions/#{d.id.toLowerCase()}.mp3"
-          .attr 'type', 'audio/mpeg'
+      div =
+        sel.append 'div'
+            .attr 'class', 'pull-xs-right'
 
-  # qa modal
-  card.append 'button'
-        .attr 'class', 'btn btn-link material-icons'
-        .text 'question_answer'
-        .on 'click', (d) ->
-          d3.select('#qaModal #question').text d.question
-          d3.select('#qaModal #answer').text d.answer
-          $('#qaModal').modal 'show'
+      # audio and button
+      div.each ->
+          sel = d3.select @
+          sel.append 'button'
+            .attr 'class', 'btn btn-link btn-nodeco material-icons control'
+            .text 'play_arrow'
+            .on 'click', ->
+              switch sel.select('.control').text()
+                when 'play_arrow'
+                  sel.select('audio').node().play()
+                when 'stop'
+                  sel.select('audio').node().pause()
+                  sel.select('audio').node().currentTime = 0
+                else
+                  sel.select('audio').node().pause()
+          sel.append 'audio'
+            .on 'play', (d) -> sel.select('.control').text 'stop'
+            .on 'pause', (d) ->
+                sel.select('.control').text 'play_arrow'
+                t0 = Date.now()
+            .append 'source'
+              .attr 'src', (d) -> "questions/#{d.id.toLowerCase()}.mp3"
+              .attr 'type', 'audio/mpeg'
 
-  $('.collapse').collapse('hide')
+      # qa modal
+      div.append 'button'
+            .attr 'class', 'btn btn-link btn-nodeco material-icons'
+            .text 'question_answer'
+            .on 'click', (d) ->
+              d3.select('#qaModal #question').text d.question
+              d3.select('#qaModal #answer').text d.answer
+              $('#qaModal').modal 'show'
